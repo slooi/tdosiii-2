@@ -7,8 +7,10 @@ precision mediump int;
 	precision mediump float;
 #endif
 
+varying vec4 v_Color;
 
 uniform int u_Renderer;
+// uniform sampler2D u_Fog;
 
 float myLinearStep(float edge, float antiAliaingLength,float x){
 	return clamp((x-(edge-antiAliaingLength))/(antiAliaingLength),0.0,1.0);
@@ -24,9 +26,13 @@ void main(){
 		float alpha = myLinearStep(0.5,fade*1.4,myDistance);
 
 		gl_FragColor = vec4(0.0,0.0,0.0,alpha);
+	}else if(u_Renderer == 1){
+		gl_FragColor = v_Color;
 	}else{
+		// vec4 texColor = vec4(texture2D(u_Fog,));
 		gl_FragColor = vec4(0.0,1.0,0.0,1.0);
 	}
+		gl_FragColor = v_Color;
 }
 
 // gl_FragCoord

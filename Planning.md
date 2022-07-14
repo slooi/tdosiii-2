@@ -43,3 +43,7 @@ How the layering works:
 -   scrolling
 -   only show enemy units when in range of <- yuki prevents hacks
 -   probes works
+
+# Forgot
+
+-   remember to always bind before buffer data

@@ -5,6 +5,13 @@ console.log("webgl.js loaded");
  * */
 let vSource, fSource;
 
+const u_Renderer = {
+	CLEAR_CIRCLE: 0,
+	TRIANGLE: 1,
+	TRIANGLE_TEX: 2,
+	CIRCLE: 3,
+};
+
 Promise.all([
 	getShaderSource("vSource.vert"),
 	getShaderSource("fSource.frag"),
@@ -46,7 +53,7 @@ function createWebgl() {
 
 	// gl
 	/**
-	 * @type {WebGLRenderingContext|null|RenderingContext}
+	 * @type {WebGLRenderingContext|null}
 	 */
 	let gl = canvas.getContext("webgl", { antialias: true });
 	if (!gl) {
@@ -62,19 +69,17 @@ function createWebgl() {
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
 	gl.enable(gl.BLEND);
-	// gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE);
-	// gl.blendFunc(gl.ONE_MINUS_SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-	// gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 	gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE);
 	// gl.disable(gl.DEPTH_TEST);
-	// gl.enable(gl.DEPTH_TEST);
-
+	// gl.disable(gl.STENCIL_TEST);
 	gl.getExtension("OES_standard_derivatives");
+
 	// program
 	const program = buildProgram(gl);
 	gl.useProgram(program);
 
 	// locations
+	// Attrib
 	const attribLocation = {};
 	for (
 		let i = 0;
@@ -88,6 +93,7 @@ function createWebgl() {
 		attribLocation[name] = gl.getAttribLocation(program, name);
 	}
 
+	// Uniform
 	const uniformLocation = {};
 	for (
 		let i = 0;
@@ -102,21 +108,53 @@ function createWebgl() {
 	}
 
 	// Data
+	// Positions
+	// prettier-ignore
+	// const visionPos = [
+	// 	0, 0,
+	// 	0.1, 0.8,
+	// 	0.9, 0.9
+	// ];
+	// // prettier-ignore
+	// const trianglePos = [
+	// 	0, 0,
+	// 	0.1, 0.8,
+	// 	0.9, 0.9
+	// ];
+	// // prettier-ignore
+	// const triangleColors = [
+	// 	255,0,0,255,
+	// 	0,0,255,255,
+	// 	0,255,0,255
+	// ]
+	// prettier-ignore
+	const circlePos = [
 
-	const circlePositions = [0, 0, 0.1, 0.8, 0.9, 0.9];
-	const trianglePositions = [0, 0, 0.1, 0.8, 0.9, 0.9];
+	]
+	// prettier-ignore
+	const trianglePos = [
+
+	]
+	// Color - can be appied to both circlePos and trianglePos
+	// prettier-ignore
+	const color = [
+
+	]
+	// uv - only applies to trianglePos
+	// prettier-ignore
+	const uv = [
+
+	]
 
 	// BUFFER
-	const buffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+	const positionBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 	gl.bufferData(
 		gl.ARRAY_BUFFER,
-		new Float32Array(circlePositions),
-		gl.STATIC_DRAW
+		new Float32Array(visionPos),
+		gl.DYNAMIC_DRAW
 	);
-
-	// vertex attribute pointer
-	console.log("attribLocation.a_Position", attribLocation.a_Position);
+	// vertex array attribute pointer
 	gl.enableVertexAttribArray(attribLocation.a_Position);
 	gl.vertexAttribPointer(
 		attribLocation.a_Position,
@@ -127,30 +165,58 @@ function createWebgl() {
 		Float32Array.BYTES_PER_ELEMENT * 0
 	);
 
-	// gl.
+	const colorBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+	gl.bufferData(
+		gl.ARRAY_BUFFER,
+		new Uint8Array(triangleColors),
+		gl.DYNAMIC_DRAW
+	);
 
-	// pointer array
+	// vertex array attribute pointer
+	gl.enableVertexAttribArray(attribLocation.a_Color);
+	gl.vertexAttribPointer(
+		attribLocation.a_Color,
+		4,
+		gl.UNSIGNED_BYTE,
+		true,
+		Uint8Array.BYTES_PER_ELEMENT * 4,
+		Uint8Array.BYTES_PER_ELEMENT * 0
+	);
 
-	// Uniforms
+	// Texture
+	const fog = buildTexture(gl);
+	gl.activeTexture(gl.TEXTURE0);
 	gl.uniform1i(uniformLocation.u_Renderer, 0);
 
-	// drawarray
-	gl.drawArrays(gl.POINTS, 0, circlePositions.length / 2);
-	// gl.uniform1i(uniformLocation.u_Renderer, 1);
-	// gl.bufferData(
-	// 	gl.ARRAY_BUFFER,
-	// 	new Float32Array(trianglePositions),
-	// 	gl.STATIC_DRAW
-	// );
-	// gl.drawArrays(gl.TRIANGLES, 0, trianglePositions.length / 2);
+	//##########
+	// Draw
+	//##########
+	// Points
+	// gl.uniform1i(uniformLocation.u_Renderer, 0);
+	// gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE);
+	// gl.drawArrays(gl.POINTS, 0, visionPos.length / 2);
 
+	// Triangles (textures)
+	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+	gl.bufferData(
+		gl.ARRAY_BUFFER,
+		new Float32Array(trianglePos),
+		gl.STATIC_DRAW
+	);
+	gl.blendFuncSeparate(gl.ONE, gl.ZERO, gl.ONE, gl.ZERO);
+	gl.uniform1i(uniformLocation.u_Renderer, 1);
+	gl.drawArrays(gl.TRIANGLES, 0, trianglePos.length / 2);
+
+	//#################################
 	// FUNCTIONS
-
-	function createLightTextureData() {
+	//#################################
+	function createBlackCanvas() {
 		const texData = new Uint8Array(canvas.width * canvas.height * 4);
 		for (let i = 3; i < canvas.width * canvas.height * 4; i = i + 4) {
 			texData[i] = 255;
 		}
+		return texData;
 	}
 
 	/**
@@ -177,7 +243,7 @@ function createWebgl() {
 		const texture = gl.createTexture();
 		gl.bindTexture(gl.TEXTURE_2D, texture);
 
-		const lightTextureData = createLightTextureData();
+		const lightTextureData = createBlackCanvas();
 		gl.texImage2D(
 			gl.TEXTURE_2D,
 			0,
@@ -252,4 +318,47 @@ function createWebgl() {
 		}
 		return program;
 	}
+
+	/**
+	 * @param {number[]} circleArray
+	 * @param {boolean} clear
+	 * */
+	function drawCircles(circleArray, clear) {
+		// Check
+		if (!gl) {
+			throw new Error("ERROR: gl doesn't exist!");
+		}
+
+		if (clear) {
+			// Set rendering mode & blending
+			gl.uniform1i(uniformLocation.u_Renderer, u_Renderer.CLEAR_CIRCLE);
+			gl.blendFuncSeparate(
+				gl.SRC_ALPHA,
+				gl.ONE_MINUS_SRC_ALPHA,
+				gl.ONE,
+				gl.ONE
+			);
+		} else {
+			// Set rendering mode
+			gl.uniform1i(uniformLocation.u_Renderer, u_Renderer.CIRCLE);
+		}
+
+		// Bind & buffer data
+		gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+		gl.bufferData(
+			gl.ARRAY_BUFFER,
+			new Float32Array(circleArray),
+			gl.DYNAMIC_DRAW
+		);
+
+		// Draw
+		gl.drawArrays(gl.POINTS, 0, circleArray.length / 2);
+
+		// Reset blending to normal
+		if (clear) {
+			gl.blendFuncSeparate(gl.ONE, gl.ZERO, gl.ONE, gl.ZERO);
+		}
+	}
+
+	return { drawCircles };
 }
