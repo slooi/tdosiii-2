@@ -149,11 +149,11 @@ function createWebgl() {
 	// BUFFER
 	const positionBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-	gl.bufferData(
-		gl.ARRAY_BUFFER,
-		new Float32Array(visionPos),
-		gl.DYNAMIC_DRAW
-	);
+	// gl.bufferData(
+	// 	gl.ARRAY_BUFFER,
+	// 	new Float32Array(visionPos),
+	// 	gl.DYNAMIC_DRAW
+	// );
 	// vertex array attribute pointer
 	gl.enableVertexAttribArray(attribLocation.a_Position);
 	gl.vertexAttribPointer(
@@ -167,11 +167,11 @@ function createWebgl() {
 
 	const colorBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-	gl.bufferData(
-		gl.ARRAY_BUFFER,
-		new Uint8Array(triangleColors),
-		gl.DYNAMIC_DRAW
-	);
+	// gl.bufferData(
+	// 	gl.ARRAY_BUFFER,
+	// 	new Uint8Array(triangleColors),
+	// 	gl.DYNAMIC_DRAW
+	// );
 
 	// vertex array attribute pointer
 	gl.enableVertexAttribArray(attribLocation.a_Color);
@@ -209,7 +209,7 @@ function createWebgl() {
 	gl.drawArrays(gl.TRIANGLES, 0, trianglePos.length / 2);
 
 	//#################################
-	// FUNCTIONS
+	// FUNCTIONS INTERNAL
 	//#################################
 	function createBlackCanvas() {
 		const texData = new Uint8Array(canvas.width * canvas.height * 4);
@@ -218,6 +218,10 @@ function createWebgl() {
 		}
 		return texData;
 	}
+
+	//#################################
+	// WEBLG SETUP FUNCTIONS INTERNAL
+	//#################################
 
 	/**
 	 * @param {WebGLRenderingContext} gl
@@ -319,6 +323,10 @@ function createWebgl() {
 		return program;
 	}
 
+	//#############################################
+	// RENDERING METHODS EXTERNAL
+	//#############################################
+
 	/**
 	 * @param {number[]} circleArray
 	 * @param {boolean} clear
@@ -359,6 +367,10 @@ function createWebgl() {
 			gl.blendFuncSeparate(gl.ONE, gl.ZERO, gl.ONE, gl.ZERO);
 		}
 	}
+
+	//#############################################
+	// RETURN
+	//#############################################
 
 	return { drawCircles };
 }
