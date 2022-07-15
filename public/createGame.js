@@ -4,6 +4,19 @@ The game object updates, stores, deletes the game objects.
 
 // Network
 
-function createGame(network) {
+async function createGame() {
+	const renderer = await createRenderer();
+
+	function update() {}
+
+	/* INITIALIZE */
+
+	/* HELPER FUNCTIONS */
+
+	/* INTERNAL FUNCTIONS */
+
+	/* EXTERNAL METHODS */
+
+	/* RETURN */
 	return {};
 }
